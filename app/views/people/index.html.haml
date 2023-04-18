@@ -1,0 +1,12 @@
+.container-xl
+  %table.table.table-striped
+    %thead
+      %tr
+        %th= link_to 'Name', people_path(params[:role], { dir: sort_dir })
+        %th= link_to 'Num Works', people_path(params[:role], { sort: 'num_works', dir: sort_dir })
+    %tbody
+      -@people.each do |person|
+        %tr
+          %td= person.name
+          %td= person.num_works
+    = pagination_footer colspan: 3

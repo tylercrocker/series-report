@@ -1,0 +1,20 @@
+!!!
+%html{lang: 'en', data: {bs: {theme: 'dark'}}}
+  %head
+    %meta{content: 'text/html; charset=UTF-8', 'http-equiv' => 'Content-Type'}/
+    %title SeriesReport
+    %meta{content: 'width=device-width,initial-scale=1', name: 'viewport'}/
+    = csrf_meta_tags
+    = csp_meta_tag
+    = stylesheet_link_tag 'application'
+    = javascript_include_tag 'application', defer: true
+  %body
+    %nav.navbar.bg-body-tertiary
+      .container-fluid
+        %a.navbar-brand{href: '/'} SeriesReport
+    = yield
+    %br
+    %br
+    %br
+    %br
+    -# TODO : footer instead of the breaks

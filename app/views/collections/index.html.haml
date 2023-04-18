@@ -1,0 +1,25 @@
+.container-xl
+  %h1= @collection_word
+  %table.table.table-striped
+    %thead
+      %tr
+        %th= link_to 'Title', collections_path(params[:type], { dir: sort_dir })
+        %th= link_to 'Creator(s)', collections_path(params[:type], { sort: 'creator', dir: sort_dir })
+        %th= link_to 'Works', collections_path(params[:type], { sort: 'num_works', dir: sort_dir })
+        %th= link_to "Sub #{@collection_word}", collections_path(params[:type], { sort: 'num_nested', dir: sort_dir })
+        %th= link_to 'Edit Reqs', collections_path(params[:type], { sort: 'edit_reqs', dir: sort_dir })
+    %tbody
+      -@collections.each do |collection|
+        %tr
+          %td= collection.title
+          %td
+            -@contributions[collection.id].each do |role, people|
+              = "#{people.map(&:name).to_sentence} (#{role})"
+          %td= collection.num_works
+          %td= collection.num_nested
+          %td
+            -if collection.num_edit_reqs.positive?
+              %button.btn.btn-primary.collection-edit-requests{type: 'button', data: {editable: {slug: collection.slug, title: collection.title}, bs: {target: '#collection-edit-requests-modal', toggle: 'modal'}}}
+                = "Review #{collection.num_edit_reqs}"
+    = pagination_footer colspan: 5
+= render partial: 'modals/collection_edit_requests_modal'

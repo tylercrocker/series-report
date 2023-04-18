@@ -1,0 +1,14 @@
+.container-xl
+  %table.table.table-striped
+    %thead
+      %tr
+        %th= link_to 'Title', works_path(params[:type], { dir: sort_dir })
+        %th= link_to 'Author', works_path(params[:type], { sort: 'author', dir: sort_dir })
+        %th= link_to 'Year Published', works_path(params[:type], { sort: 'published', dir: sort_dir })
+    %tbody
+      -@works.each do |work|
+        %tr
+          %td= work.title
+          %td= authors_for(@contributions[work.id])
+          %td= work.year_published
+    = pagination_footer colspan: 3
