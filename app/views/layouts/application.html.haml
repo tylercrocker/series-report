@@ -6,7 +6,8 @@
     %meta{content: 'width=device-width,initial-scale=1', name: 'viewport'}/
     = csrf_meta_tags
     = csp_meta_tag
-    = stylesheet_link_tag 'application'
+    = stylesheet_link_tag 'application.bootstrap', id: 'bootstrap-styles'
+    = stylesheet_link_tag 'application.custom', id: 'custom-styles'
     = javascript_include_tag 'application', defer: true
   %body
     %nav.navbar.bg-body-tertiary
@@ -17,4 +18,6 @@
     %br
     %br
     %br
+    = render partial: 'modals/edit_requests_modal'
+    = render partial: 'modals/new_edit_request_modal'
     -# TODO : footer instead of the breaks

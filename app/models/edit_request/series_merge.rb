@@ -80,7 +80,7 @@ class EditRequest::SeriesMerge < EditRequest
     end
   end
 
-  def process_edit_request! edit_request_data
+  def accept_edit_request! edit_request_data
     series = Collection::Series.where(slug: edit_request_data.keys).order(:slug).to_a
     top_level = series.shift
 

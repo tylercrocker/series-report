@@ -132,6 +132,6 @@ class Importers::Books::Goodreads < Importers::Books::Base
       end
     end
 
-    title.sub(SERIES_TITLE_REGEX, '')
+    title.sub(SERIES_TITLE_REGEX, '').strip
   end
 end

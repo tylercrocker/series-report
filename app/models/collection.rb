@@ -9,6 +9,7 @@ class Collection < ApplicationRecord
   has_many :contributions, as: :contributable
   has_many :people, through: :contributions
   has_many :edit_requests, as: :editable, dependent: :destroy
+  has_many :alternate_names, as: :nameable, dependent: :destroy
 
   scope :outer_joins_works, ->() do
     joins('LEFT OUTER JOIN collection_items ON collection_items.collection_id = collections.id AND collection_items.collection_itemable_type = \'Work\'')
@@ -73,6 +74,43 @@ class Collection < ApplicationRecord
 
   def contained_items
     contained_relations.map(&:item)
+  end
+
+  def editable_json
+    {
+      type: {
+        editable: false,
+        type: 'class',
+        value: self.type,
+        displayable: self.sti_type
+      },
+      slug: {
+        editable: false,
+        type: 'path',
+        value: self.slug
+      },
+      title: {
+        editable: true,
+        type: 'string',
+        value: self.title,
+        alternates: self.alternate_names.map(&:editable_json)
+      },
+      description: {
+        editable: true,
+        type: 'text',
+        value: self.description
+      },
+      # contributors: {
+      #   editable: false,
+      #   type: 'array',
+      #   value: self.people
+      # },
+      last_updated: {
+        editable: false,
+        type: 'timestamp',
+        value: self.updated_at
+      }
+    }
   end
 
   private

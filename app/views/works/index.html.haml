@@ -1,14 +1,26 @@
 .container-xl
+  %h1= @work_word
   %table.table.table-striped
     %thead
       %tr
         %th= link_to 'Title', works_path(params[:type], { dir: sort_dir })
         %th= link_to 'Author', works_path(params[:type], { sort: 'author', dir: sort_dir })
-        %th= link_to 'Year Published', works_path(params[:type], { sort: 'published', dir: sort_dir })
+        %th= link_to 'Year Published', works_path(params[:type], { sort: 'year_published', dir: sort_dir })
+        %th= link_to 'Published On', works_path(params[:type], { sort: 'published_on', dir: sort_dir })
+        %th{colspan: 2}
+          = link_to 'Edit Reqs', works_path(params[:type], { sort: 'edit_reqs', dir: sort_dir })
     %tbody
       -@works.each do |work|
         %tr
           %td= work.title
           %td= authors_for(@contributions[work.id])
           %td= work.year_published
+          %td= work.published_on
+          %td
+            -if work.num_edit_reqs.positive?
+              %button.btn.btn-primary.edit-requests{type: 'button', data: {editable: {type: work.class.name, slug: work.slug, title: work.title}, bs: {target: '#edit-requests-modal', toggle: 'modal'}}}
+                = "Review #{work.num_edit_reqs}"
+          %td
+            %button.btn.btn-secondary.new-edit-request{type: 'button', data: {editable: {type: work.class.name, slug: work.slug, title: work.title}, bs: {target: '#new-edit-request-modal', toggle: 'modal'}}}
+              %i.bi.bi-plus-square-dotted
     = pagination_footer colspan: 3

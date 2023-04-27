@@ -1,5 +1,6 @@
 class CollectionsController < ApplicationController
   before_action :determine_collection_class
+  before_action :fetch_collection, only: [:show]
 
   def index
     redirect_to collections_path and return if @collection_class.nil?
@@ -18,22 +19,54 @@ class CollectionsController < ApplicationController
   end
 
   def show
+    return if @collection.nil?
 
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: { fields: @collection.editable_json }, template: false
+      end
+    end
   end
 
   private
 
   def determine_collection_class
-    @collection_class = case params[:type]
+    @collection_class = case params[:type]&.downcase
     when nil
       @collection_word = 'Collections'
       Collection
-    when 'series'
+    when 'collection::series', 'series'
       @collection_word = 'Series'
       Collection::Series
     else
+      if request.format == :json
+        render json: {
+          message: "Invalid collection type '#{params[:type]}'"
+        }, status: 404
+        return
+      end
+
       nil
     end
   end
 
+  def fetch_collection
+    return if @collection_class.nil?
+
+    begin
+      @collection = @collection_class.where(slug: params[:slug]).first!
+    rescue ActiveRecord::RecordNotFound
+      respond_to do |format|
+        format.html do
+          raise 'I NEED TO REDIRECT OR SOMETHING?!'
+        end
+        format.json do
+          render json: {
+            message: "No #{@collection_class} found for `#{params[:slug]}`"
+          }, status: 404
+        end
+      end
+    end
+  end
 end

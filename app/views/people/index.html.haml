@@ -4,9 +4,18 @@
       %tr
         %th= link_to 'Name', people_path(params[:role], { dir: sort_dir })
         %th= link_to 'Num Works', people_path(params[:role], { sort: 'num_works', dir: sort_dir })
+        %th{colspan: 2}
+          = link_to 'Edit Reqs', works_path(params[:type], { sort: 'edit_reqs', dir: sort_dir })
     %tbody
       -@people.each do |person|
         %tr
           %td= person.name
           %td= person.num_works
+          %td
+            -if person.num_edit_reqs.positive?
+              %button.btn.btn-primary.edit-requests{type: 'button', data: {editable: {type: person.class.name, slug: person.slug, title: person.name}, bs: {target: '#edit-requests-modal', toggle: 'modal'}}}
+                = "Review #{person.num_edit_reqs}"
+          %td
+            %button.btn.btn-secondary.new-edit-request{type: 'button', data: {editable: {type: person.class.name, slug: person.slug, title: person.name}, bs: {target: '#new-edit-request-modal', toggle: 'modal'}}}
+              %i.bi.bi-plus-square-dotted
     = pagination_footer colspan: 3

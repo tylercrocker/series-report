@@ -1,4 +1,5 @@
 // Entry point for the build script in your package.json
-import * as bootstrap from "bootstrap"
+import * as bootstrap from 'bootstrap';
 
-import { CollectionEditRequests } from './edit-requests/collection-edit-requests'
+import { EditRequests } from './edit-requests/edit-requests';
+import { NewEditRequest } from './edit-requests/new-edit-request';

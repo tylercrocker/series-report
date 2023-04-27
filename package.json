@@ -5,6 +5,7 @@
     "@popperjs/core": "^2.11.7",
     "bootstrap": "^5.3.0-alpha3",
     "bootstrap-icons": "^1.10.3",
+    "diff": "^5.1.0",
     "esbuild": "^0.17.12",
     "lit": "^2.7.2",
     "lodash": "^4.17.21",
@@ -12,6 +13,6 @@
   },
   "scripts": {
     "build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets",
-    "build:css": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules"
+    "build:css": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.bootstrap.css --no-source-map --load-path=node_modules && sass ./app/assets/stylesheets/application.custom.scss:./app/assets/builds/application.custom.css --no-source-map --load-path=node_modules"
   }
 }

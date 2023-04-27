@@ -1,0 +1,8 @@
+#new-edit-request-modal.modal.fade{tabindex: '-1', aria: {hidden: true, labeledby: 'new-edit-request-modal-title'}}
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        %h1#new-edit-request-modal-title.modal-title.fs-5 New Edit Request
+        %button.btn-close{type: 'button', aria: {label: 'Close'}, data: {bs: {dismiss: 'modal'}}}
+      .modal-body
+        %new-edit-request
