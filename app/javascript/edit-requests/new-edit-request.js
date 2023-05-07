@@ -8,6 +8,7 @@ const fetchEditableData = async (requestEl, button) => {
   const jsonResponse = await httpResponse.json();
 
   if (httpResponse.ok) {
+    requestEl.editableType = button.dataset.editableType;
     requestEl.fields = jsonResponse.fields;
   } else {
     requestEl.error = jsonResponse.message;
@@ -39,6 +40,7 @@ export class NewEditRequest extends LitElement {
   `;
 
   static properties = {
+    editableType: { type: String },
     loading: { type: Boolean },
     fields: { attribute: false },
     error: { type: String },
@@ -47,7 +49,6 @@ export class NewEditRequest extends LitElement {
   constructor() {
     super();
 
-    this.defaultLanguage = 'English';
     this.newFields = {
       alternate_names: {
         key: { editable: false, value: 'new' },
@@ -101,11 +102,11 @@ export class NewEditRequest extends LitElement {
   }
 
   _renderBaseInfo() {
-    const path = buildRoute({ type: this.fields.type.value, slug: this.fields.slug.value });
+    const path = buildRoute({ type: this.editableType, slug: this.fields.slug.value });
 
     return html`
       <div class="info">
-        <span class="type">${this.fields.type.value}</span>
+        <span class="type">${this.fields.type.displayable || this.fields.type.value}</span>
          - 
         "<span class="label">${(this.fields.title || this.fields.name).value}</span>"
         <a href="${path}" target="_blank">https://www.seriesreport.net${path}</a>

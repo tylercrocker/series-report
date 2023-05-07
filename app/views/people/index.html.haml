@@ -13,7 +13,7 @@
           %td= person.num_works
           %td
             -if person.num_edit_reqs.positive?
-              %button.btn.btn-primary.edit-requests{type: 'button', data: {editable: {type: person.class.name, slug: person.slug, title: person.name}, bs: {target: '#edit-requests-modal', toggle: 'modal'}}}
+              %button.btn.btn-primary.edit-requests{type: 'button', data: {editable: {type: "People::Person", slug: person.slug, title: person.name}, bs: {target: '#edit-requests-modal', toggle: 'modal'}}}
                 = "Review #{person.num_edit_reqs}"
           %td
             %button.btn.btn-secondary.new-edit-request{type: 'button', data: {editable: {type: person.class.name, slug: person.slug, title: person.name}, bs: {target: '#new-edit-request-modal', toggle: 'modal'}}}

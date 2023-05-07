@@ -83,6 +83,10 @@ class EditRequestsController < ApplicationController
       @edit_request.status = :ignored
     when 'deny'
       @edit_request.status = :denied
+    when 'delete'
+      @edit_request.destroy!
+      render json: { message: 'Request removed!' }, status: 200
+      return
     when nil
       render json: { message: 'Edit Request action is required!' }, status: 400
       return

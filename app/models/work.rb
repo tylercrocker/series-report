@@ -1,5 +1,6 @@
 class Work < ApplicationRecord
   include Sluggable
+  include AlternateNameable
 
   SLUGGABLE_FIELDS = [:title].freeze
 
@@ -9,7 +10,6 @@ class Work < ApplicationRecord
   has_many :contributions, as: :contributable
   has_many :people, through: :contributions
   has_many :edit_requests, as: :editable, dependent: :destroy
-  has_many :alternate_names, as: :nameable, dependent: :destroy
 
   scope :outer_joins_waiting_edit_requests, ->() do
     joins('LEFT OUTER JOIN edit_requests ON edit_requests.editable_type = \'Work\' AND edit_requests.editable_id = works.id AND edit_requests.status = 0') # 0 is waiting
@@ -32,7 +32,7 @@ class Work < ApplicationRecord
         editable: false,
         type: 'class',
         value: self.type,
-        displayable: self.sti_type
+        displayable: self.sti_type.titleize
       },
       slug: {
         editable: false,

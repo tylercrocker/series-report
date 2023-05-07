@@ -158,6 +158,7 @@ export class EditRequests extends LitElement {
               <option value="accept" selected>Accept Checked</option>
               <option value="ignore">Ignore</option>
               <option value="deny">Deny</option>
+              <option value="delete">Delete</option>
             </select>
             <button
               type="button"
@@ -202,7 +203,7 @@ export class EditRequests extends LitElement {
                   })}
                 `;
               default:
-                return this.renderFieldDiff(request, fieldName, _.upperFirst(fieldName), request.request[fieldName].from, request.request[fieldName].to);
+                return this.renderFieldDiff(request, _.upperFirst(fieldName), fieldName, request.request[fieldName].from, request.request[fieldName].to);
               }
             })}
           </tbody>
@@ -212,7 +213,7 @@ export class EditRequests extends LitElement {
   }
 
   renderFieldDiff(request, label, key, from, to) {
-    const diff = Diff.diffChars(from || '', to || '');
+    const diff = Diff.diffChars((from || '').toString(), (to || '').toString());
 
     return html`
       <tr>

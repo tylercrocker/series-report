@@ -1,9 +1,9 @@
 class Person < ApplicationRecord
   include Sluggable
+  include AlternateNameable
 
   SLUGGABLE_FIELDS = [:name].freeze
 
-  has_many :alternate_names, as: :nameable
   has_many :contributions
   has_many :contributables, through: :contributions
   has_many :edit_requests, as: :editable, dependent: :destroy
@@ -46,7 +46,7 @@ class Person < ApplicationRecord
       type: {
         editable: false,
         type: 'class',
-        value: 'Person',
+        value: 'People::Person',
         displayable: 'Person'
       },
       slug: {

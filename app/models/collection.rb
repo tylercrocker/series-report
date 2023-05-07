@@ -1,5 +1,6 @@
 class Collection < ApplicationRecord
   include Sluggable
+  include AlternateNameable
 
   SLUGGABLE_FIELDS = [:title].freeze
 
@@ -9,7 +10,6 @@ class Collection < ApplicationRecord
   has_many :contributions, as: :contributable
   has_many :people, through: :contributions
   has_many :edit_requests, as: :editable, dependent: :destroy
-  has_many :alternate_names, as: :nameable, dependent: :destroy
 
   scope :outer_joins_works, ->() do
     joins('LEFT OUTER JOIN collection_items ON collection_items.collection_id = collections.id AND collection_items.collection_itemable_type = \'Work\'')
@@ -82,7 +82,7 @@ class Collection < ApplicationRecord
         editable: false,
         type: 'class',
         value: self.type,
-        displayable: self.sti_type
+        displayable: self.sti_type.titleize
       },
       slug: {
         editable: false,
@@ -119,25 +119,6 @@ class Collection < ApplicationRecord
         value: self.updated_at
       }
     }
-  end
-
-  def custom_edit_alternate_names data
-    data.each do |key, value|
-      if key.start_with?('new_')
-        # TODO : handle existing, same-named items
-        self.alternate_names.create!(name: value['name']['to'], language: value['language']['to'])
-        next
-      end
-
-      existing = self.alternate_names.where(id: key).first
-      next if existing.nil?
-
-      value.each do |field, from_to|
-        # TODO : handle cases where the name was changed by another request
-        existing.send("#{field}=", from_to['to'])
-      end
-      existing.save!
-    end
   end
 
   private
