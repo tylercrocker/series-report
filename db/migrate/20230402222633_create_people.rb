@@ -28,5 +28,7 @@ class CreatePeople < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
+
+    create_index :alternate_names. [:nameable_type, :nameable_id, :name, :language], unique: true, name: 'alternate_names_unique_constraint'
   end
 end

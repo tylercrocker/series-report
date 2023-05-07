@@ -23,13 +23,50 @@ class EditRequestsController < ApplicationController
 
     edit_request = @request_class.new(editable: @editable, source: 'user', status: :waiting, request: {})
 
-    params[:editable].each do |key, value|
-      next if @editable.send(key).to_s == value.strip
+    params[:editable].each do |field_name, value|
+      case field_name
+      when 'alternate_names'
+        value.each do |key, alt_value|
+          if key == 'new'
+            alt_value[:name].each_with_index do |new_name, i|
+              # Don't accept blank names, obviously
+              next if new_name.blank?
 
-      edit_request.request[key] = { from: @editable.send(key), to: value.strip }
+              edit_request.request[field_name] ||= { as: 'array[table]' }
+              edit_request.request[field_name]["#{key}_#{i}"] = {
+                name: { to: new_name },
+                language: { to: alt_value[:language][i].blank? ? 'English' : alt_value[:language][i] }
+              }
+            end
+          else
+            existing_record = AlternateName.where(id: key).first
+            # If someone already deleted the record let's ignore this
+            next if existing_record.nil?
+
+            # TODO : maybe pass back what it WAS...? If that doesn't match I could throw an error for race conditions... that would prevent creating a change to X and then someone goes to make a change to Y but the change to X gets made while they're creating the request... unlikely, but it's still a race condition to consider
+            # Should also consider blank languages as if they were "English" (the default)
+            next if existing_record.name == alt_value[:name] && existing_record.language == alt_value[:language]
+
+            edit_request.request[field_name] ||= { as: 'array[table]' }
+            edit_request.request[field_name][key] = {
+              name: { from: existing_record.name, to: alt_value[:name] },
+              language: { from: existing_record.language, to: alt_value[:language] }
+            }
+          end
+        end
+      else # Normal fields
+        next if @editable.send(field_name).to_s == value.strip
+
+        edit_request.request[field_name] = {
+          from: @editable.send(field_name),
+          to: value.strip
+        }
+      end
     end
 
-    if edit_request.save
+    if edit_request.request.blank?
+      render json: { success: false, message: 'nothing to save' }, status: 400
+    elsif edit_request.save
       render json: { success: true }
     else
       render json: { success: false, errors: edit_request.errors }, status: 500

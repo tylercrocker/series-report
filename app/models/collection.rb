@@ -93,17 +93,25 @@ class Collection < ApplicationRecord
         editable: true,
         type: 'string',
         value: self.title,
-        alternates: self.alternate_names.map(&:editable_json)
+        required: true
+      },
+      alternate_names: {
+        editable: true,
+        type: 'array[table]',
+        # NOTE : the headers HAVE to be ordered properly!
+        headers: ['Alternate Titles', 'Language'],
+        value: self.alternate_names.map(&:editable_json)
       },
       description: {
         editable: true,
         type: 'text',
-        value: self.description
+        value: self.description,
+        required: false
       },
       # contributors: {
-      #   editable: false,
+      #   editable: true,
       #   type: 'array',
-      #   value: self.people
+      #   value: self.people.map(&:editable_json)
       # },
       last_updated: {
         editable: false,
@@ -111,6 +119,25 @@ class Collection < ApplicationRecord
         value: self.updated_at
       }
     }
+  end
+
+  def custom_edit_alternate_names data
+    data.each do |key, value|
+      if key.start_with?('new_')
+        # TODO : handle existing, same-named items
+        self.alternate_names.create!(name: value['name']['to'], language: value['language']['to'])
+        next
+      end
+
+      existing = self.alternate_names.where(id: key).first
+      next if existing.nil?
+
+      value.each do |field, from_to|
+        # TODO : handle cases where the name was changed by another request
+        existing.send("#{field}=", from_to['to'])
+      end
+      existing.save!
+    end
   end
 
   private

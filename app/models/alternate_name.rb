@@ -3,15 +3,24 @@ class AlternateName < ApplicationRecord
 
   def editable_json
     {
+      key: {
+        editable: false,
+        type: 'key',
+        value: self.id
+      },
       name: {
         editable: true,
         type: 'string',
-        value: self.name
+        value: self.name,
+        placeholder: 'Bruce Wayne',
+        required: true
       },
       language: {
         editable: true,
         type: 'string',
-        value: self.language
+        value: self.language,
+        placeholder: 'English (default)',
+        required: false
       },
       last_updated: {
         editable: false,

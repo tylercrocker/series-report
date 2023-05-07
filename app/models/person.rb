@@ -58,17 +58,25 @@ class Person < ApplicationRecord
         editable: true,
         type: 'string',
         value: self.name,
-        alternates: self.alternate_names.map(&:editable_json)
+        required: true
       },
       name_last_first: {
         editable: false,
         type: 'string',
         value: self.name_last_first
       },
+      alternate_names: {
+        editable: true,
+        type: 'array[table]',
+        # NOTE : the headers HAVE to be ordered properly!
+        headers: ['Alternate Names', 'Language'],
+        value: self.alternate_names.map(&:editable_json)
+      },
       bio: {
         editable: true,
         type: 'text',
-        value: self.bio
+        value: self.bio,
+        required: false
       },
       # contributions: {
       #   editable: false,

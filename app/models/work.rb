@@ -43,22 +43,32 @@ class Work < ApplicationRecord
         editable: true,
         type: 'string',
         value: self.title,
-        alternates: self.alternate_names.map(&:editable_json)
+        required: true
+      },
+      alternate_names: {
+        editable: true,
+        type: 'array[table]',
+        # NOTE : the headers HAVE to be ordered properly!
+        headers: ['Alternate Titles', 'Language'],
+        value: self.alternate_names.map(&:editable_json)
       },
       description: {
         editable: true,
         type: 'text',
-        value: self.description
+        value: self.description,
+        required: false
       },
       year_published: {
         editable: true,
         type: 'integer',
-        value: self.year_published
+        value: self.year_published,
+        required: true
       },
       published_on: {
         editable: true,
         type: 'date',
-        value: self.published_on
+        value: self.published_on,
+        required: false
       },
       # contributors: {
       #   editable: false,

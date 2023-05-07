@@ -187,28 +187,50 @@ export class EditRequests extends LitElement {
         <table class="table">
           <tbody>
             ${fieldNames.map(fieldName => {
-              const diff = Diff.diffChars(request.request[fieldName].from || '', request.request[fieldName].to || '');
+              switch(request.request[fieldName].as) {
+              case 'array[table]':
+                return html`
+                  ${Object.keys(request.request[fieldName]).map(fieldKey => {
+                    if (fieldKey == 'as') { return null; }
 
-              return html`
-                <tr>
-                  <td class="right-align">${_.upperFirst(fieldName)}:</td>
-                  <td>
-                    ${diff.map(part => html`<span style="color: ${part.added ? 'green' : part.removed ? 'red' : 'grey'}">${part.value}</span>`)}
-                  </td>
-                  <td class="right-align">
-                    <input
-                      type="checkbox"
-                      class="form-check-input request-${request.id}"
-                      value="${fieldName}"
-                      checked
-                    />
-                  </td>
-                </tr>
-              `
+                    const field = request.request[fieldName][fieldKey];
+
+                    return html`
+                      ${this.renderFieldDiff(request, 'Alternate Name', `${fieldName}[${fieldKey}][name]`, field.name.from, field.name.to)}
+                      ${this.renderFieldDiff(request, 'Language', `${fieldName}[${fieldKey}][language]`, field.language.from, field.language.to)}
+                    `;
+                  })}
+                `;
+              default:
+                return this.renderFieldDiff(request, fieldName, _.upperFirst(fieldName), request.request[fieldName].from, request.request[fieldName].to);
+              }
             })}
           </tbody>
         </table>
       `)}
+    `;
+  }
+
+  renderFieldDiff(request, label, key, from, to) {
+    const diff = Diff.diffChars(from || '', to || '');
+
+    return html`
+      <tr>
+        <td class="right-align">${label}:</td>
+        <td>
+          ${diff.map(part => html`<span style="color: ${part.added ? 'green' : part.removed ? 'red' : 'grey'}">${part.value}</span>`)}
+        </td>
+        <td class="right-align">
+          ${diff.length > 1 || Object.keys(diff[0]).length > 2 ? html`
+            <input
+              type="checkbox"
+              class="form-check-input request-${request.id}"
+              value="${key}"
+              checked
+            />
+          ` : null}
+        </td>
+      </tr>
     `;
   }
 
