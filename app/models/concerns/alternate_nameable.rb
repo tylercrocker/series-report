@@ -1,6 +1,8 @@
 module AlternateNameable
   extend ActiveSupport::Concern
 
+  DEFAULT_LANGUAGE = 'English'.freeze
+
   included do
     has_many :alternate_names, as: :nameable, dependent: :destroy
   end
@@ -9,7 +11,7 @@ module AlternateNameable
     data.each do |key, value|
       if key.start_with?('new_')
         # TODO : handle existing, same-named items
-        self.alternate_names.create!(name: value['name']['to'], language: value['language']['to'])
+        self.alternate_names.create!(name: value.dig('name', 'to'), language: value.dig('language', 'to') || DEFAULT_LANGUAGE)
         next
       end
 
