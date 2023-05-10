@@ -1,12 +1,6 @@
 # Available keys as of April 2022:
 # Book Id,Title,Author,Author l-f,Additional Authors,ISBN,ISBN13,My Rating,Average Rating,Publisher,Binding,Number of Pages,Year Published,Original Publication Year,Date Read,Date Added,Bookshelves,Bookshelves with positions,Exclusive Shelf,My Review,Spoiler,Private Notes,Read Count,Recommended For,Recommended By,Owned Copies,Original Purchase Date,Original Purchase Location,Condition,Condition Description,BCID
 class Importers::Books::Goodreads < Importers::Books::Base
-  NAME_CAPTURE = /(?<name>[^#]+)/
-  POSITION_CAPTURE = /,?\s+(?<position>#[\d\.\-]+)/
-  PART_CAPTURE = /(?<part>Part\s+[\d]+)/
-  CAPTURE_DELIMITER = /[;,]\s+/
-  SERIES_TITLE_REGEX = /\(#{NAME_CAPTURE}#{POSITION_CAPTURE}\s*(#{CAPTURE_DELIMITER}#{NAME_CAPTURE}#{POSITION_CAPTURE}\s*|#{CAPTURE_DELIMITER}#{PART_CAPTURE}\s*)*\)$/
-
   attr_accessor :goodreads_id, :isbn10, :isbn13, :edition, :work, :title, :series
 
   # TODO : REMOVE
@@ -19,7 +13,6 @@ class Importers::Books::Goodreads < Importers::Books::Base
   end
 
   def import_object data
-    puts "\n\n\n\n\n\nSTARTING IMPORT WITH THE FOLLOWING DATA:\n#{data.inspect}\n\n\n\n\n"
     @goodreads_id = data['Book Id']
     # Not sure why Goodreads formats their ISBNs like this...
     @isbn10 = data['ISBN']&.gsub(/^="|"$/, '')
@@ -32,7 +25,9 @@ class Importers::Books::Goodreads < Importers::Books::Base
     @work = @edition&.work
 
     author = find_or_create_author(data)
-    title = process_series_from_title(data['Title'].strip.squeeze(' '))
+    title, @series = TitleProcessor.series_data_from_book_title(data['Title'].strip.squeeze(' '))
+
+    # TODO : need to try to do a lookup by title
 
     if @work.nil?
       # If we had no work we need to build that first
@@ -59,14 +54,15 @@ class Importers::Books::Goodreads < Importers::Books::Base
     # Now we can build out the edition
     # TODO: figure out how to deal with this race condition...
     @edition ||= Edition::Book.where(work: @work, title: title).first_or_initialize
+    @edition.publisher ||= data['Publisher']
     @edition.year_published ||= data['Year Published']
-    @edition.binding_type ||= Edition::Book.standardize_binding(data['Binding'])
+    @edition.binding_type ||= data['Binding']
     @edition.num_pages ||= data['Number of Pages'] if data['Number of Pages'].to_i.positive?
     @edition.save!
 
     @edition.add_identifier!(EditionIdentifier::GoodreadsId, @goodreads_id)
-    @edition.add_identifier!(EditionIdentifier::Isbn10, @isbn10)
-    @edition.add_identifier!(EditionIdentifier::Isbn13, @isbn13)
+    @isbn10 = @edition.add_identifier!(EditionIdentifier::Isbn10, @isbn10)
+    @isbn13 = @edition.add_identifier!(EditionIdentifier::Isbn13, @isbn13)
 
     unless @edition.contributions.where(person: author).present?
       Contribution::Author.create_or_find_by(contributable: @edition, person: author)
@@ -83,6 +79,8 @@ class Importers::Books::Goodreads < Importers::Books::Base
 
       EditRequest::SeriesMerge.check_for_mergers(collection)
     end
+
+    super
   end
 
   def find_or_create_author data
@@ -106,32 +104,5 @@ class Importers::Books::Goodreads < Importers::Books::Base
     else
       raise 'WHY DID WE HAVE MULTIPLE AUTHOR RECORDS?!'
     end
-  end
-
-  def process_series_from_title title
-    @series = {}
-
-    series_data = title.scan(SERIES_TITLE_REGEX).flatten.compact
-    # If we had no matches then there was no series info
-    return title if series_data.empty?
-
-    current_series = nil
-    series_data.each do |datum|
-      if datum.start_with?('#')
-        if datum.include?('-')
-          @series[current_series][:position_extra] = datum.sub(/^#/, '')
-        else
-          @series[current_series][:position] = datum.sub(/^#/, '')
-        end
-      elsif datum.start_with?('Part ')
-        @series[current_series][:position_extra] = datum
-      else
-        # Regex pulls in the trailing comma/space, so let's get rid of them
-        current_series = datum.strip.gsub(/(,\s*|\s+)$/, '')
-        @series[current_series] = {}
-      end
-    end
-
-    title.sub(SERIES_TITLE_REGEX, '').strip
   end
 end

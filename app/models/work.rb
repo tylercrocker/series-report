@@ -1,14 +1,13 @@
 class Work < ApplicationRecord
   include Sluggable
   include AlternateNameable
+  include Authorable
 
   SLUGGABLE_FIELDS = [:title].freeze
 
   has_many :collection_items, as: :collection_itemable
   has_many :collections, through: :collection_items
   has_many :editions
-  has_many :contributions, as: :contributable
-  has_many :people, through: :contributions
   has_many :edit_requests, as: :editable, dependent: :destroy
 
   scope :outer_joins_waiting_edit_requests, ->() do

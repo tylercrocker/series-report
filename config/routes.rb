@@ -1,5 +1,11 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+  # authenticate :user, lambda { |u| u.admin? } do
+    mount Sidekiq::Web => '/sidekiq'
+  # end
 
   defaults format: :json do
     resources :edit_requests, path: '/edit-requests(/:editable_type/:editable_slug)', only: [:index, :create, :update]

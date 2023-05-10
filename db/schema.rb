@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_14_210953) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_08_225502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,6 +21,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_14_210953) do
     t.string "language"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["nameable_type", "nameable_id", "name", "language"], name: "alternate_names_unique_constraint", unique: true
+  end
+
+  create_table "api_fetches", force: :cascade do |t|
+    t.string "type", null: false
+    t.string "fetchable_type", null: false
+    t.bigint "fetchable_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "last_fetched_at"
+    t.json "messages"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["type", "fetchable_type", "fetchable_id"], name: "api_fetches_unique_constraint", unique: true
   end
 
   create_table "collection_items", force: :cascade do |t|
