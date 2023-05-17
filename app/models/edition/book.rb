@@ -7,12 +7,14 @@ class Edition::Book < Edition
       enum: [
         'Audio',
         'Ebook',
+        'Kindle Edition',
         'Hardcover',
         'Library Binding',
         'Mass Market Paperback',
         'Paperback',
         'Unbound',
-        'Unknown Binding'
+        'Unknown Binding',
+        'Bunkobon'
       ],
       standardizer: :standardize_binding
     },
@@ -52,24 +54,24 @@ class Edition::Book < Edition
   DATA_ACCESSORS = DATA_SETTERS.keys.map{ |key| key.to_s.delete('=').to_sym }.freeze
   SLUGGABLE_FIELDS = [:year_published, :binding_type].freeze
 
-  scope :by_goodreads_id, ->(ident) { by_identifier(EditionIdentifier::GoodreadsId, ident) }
-  scope :by_isbn10, ->(ident) { by_identifier(EditionIdentifier::Isbn10, ident) }
-  scope :by_isbn13, ->(ident) { by_identifier(EditionIdentifier::Isbn13, ident) }
-  scope :by_library_thing_id, ->(ident) { by_identifier(EditionIdentifier::LibraryThingId, ident) }
-  scope :by_open_library_id, ->(ident) { by_identifier(EditionIdentifier::OpenLibraryId, ident) }
+  scope :by_goodreads_id, ->(ident) { by_identifier(Identifier::GoodreadsId, ident) }
+  scope :by_isbn10, ->(ident) { by_identifier(Identifier::Isbn10, ident) }
+  scope :by_isbn13, ->(ident) { by_identifier(Identifier::Isbn13, ident) }
+  scope :by_library_thing_id, ->(ident) { by_identifier(Identifier::LibraryThingId, ident) }
+  scope :by_open_library_id, ->(ident) { by_identifier(Identifier::OpenLibraryId, ident) }
 
   def self.standardize_binding the_binding
-    case the_binding
-    when 'Audiobook', 'Audio Cassette', 'Audio CD', 'MP3 CD', 'DVD-ROM'
+    case the_binding&.downcase
+    when 'audiobook', 'audio cassette', 'audio cd', 'mp3 cd', 'dvd-rom'
       'Audio'
-    when 'Kindle Edition'
-      'Ebook'
-    when 'Mss Market Paperback'
+    when 'mss market paperback'
       'Mass Market Paperback'
-    when 'School & Library Binding'
+    when 'school & library binding'
       'Library Binding'
-    when 'Perfect Paperback'
+    when 'perfect paperback'
       'Paperback'
+    when 'paperback bunko'
+      'Bunkobon'
     when '', nil
       'Unknown Binding'
     else

@@ -13,26 +13,22 @@ class IsbnDb::EditionTitleWorker < IsbnDb::BaseWorker
     end
 
     # There is technically a race condition here... but I'm not super worried about it
-    # return if api_fetch.processing?
+    return if api_fetch.processing?
 
     api_fetch.status = :processing
     api_fetch.save!
 
     # identifiers = edition.edition_identifiers.index_by(&:type)
     # isbn13, isbn10 = [
-    #   identifiers['EditionIdentifier::Isbn13']&.identifier,
-    #   identifiers['EditionIdentifier::Isbn10']&.identifier
+    #   identifiers['Identifier::Isbn13']&.identifier,
+    #   identifiers['Identifier::Isbn10']&.identifier
     # ]
 
     begin
-      api_edition = api_fetch.edition_by_title(edition)
+      api_edition = api_fetch.api_data_for_edition_title
       return if api_edition.nil?
 
       api_fetch.update_edition_from_api_data!(edition, api_edition)
-
-      api_fetch.messages = {}
-      api_fetch.status = :success
-      api_fetch.save!
     rescue StandardError => e
       # Not sure what can happen here... let's record the information to try and debug!
       api_fetch.status = :failure

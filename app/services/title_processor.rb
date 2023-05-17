@@ -35,6 +35,10 @@ class TitleProcessor
       matched: true,
       reason: :started_with
     } if title_a.start_with?(title_b)
+    return {
+      matched: true,
+      reason: :ended_with
+    } if title_a.end_with?(title_b)
 
     title_a = title_a.sub(PARENTHETICAL_MATCH, '')
     return {

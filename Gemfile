@@ -30,6 +30,7 @@ gem 'sidekiq'
 gem 'sidekiq-limit_fetch'
 
 gem 'haml'
+gem 'nokogiri'
 gem 'pagy'
 
 # Tagging for replicating the shelfing mechanics from other sites.

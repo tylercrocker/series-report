@@ -238,6 +238,7 @@ DEPENDENCIES
   isbndb-ruby
   jbuilder
   jsbundling-rails
+  nokogiri
   pagy
   pg (~> 1.1)
   pry

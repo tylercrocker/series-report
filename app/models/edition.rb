@@ -15,25 +15,23 @@ class Edition < ApplicationRecord
     })
   end
 
+  scope :without_goodreads_id, ->() do
+    joins("LEFT OUTER JOIN edition_identifiers ON editions.id = edition_identifiers.edition_id AND edition_identifiers.type = 'Identifier::GoodreadsId'").where(edition_identifiers: { id: nil })
+  end
+
   scope :by_isbns, ->(isbns) {
     joins(:edition_identifiers).where(edition_identifiers: {
-      type: ['EditionIdentifier::Isbn10', 'EditionIdentifier::Isbn13'],
+      type: ['Identifier::Isbn10', 'Identifier::Isbn13'],
       identifier: isbns
     })
   }
 
-  def invalid_identifier? the_identifier
-    the_identifier.blank?
-  end
-
-  def add_identifier(id_class, the_identifier)
-    return if self.invalid_identifier?(the_identifier)
-
-    id_class.create_or_find_by(edition: self, identifier: the_identifier)
+  def fetch
+    self.api_fetches.first.api_data_for_edition_title
   end
 
   def add_identifier!(id_class, the_identifier)
-    return if self.invalid_identifier?(the_identifier)
+    return if id_class.invalid_identifier?(the_identifier)
 
     id_class.create_or_find_by!(edition: self, identifier: the_identifier)
   end
