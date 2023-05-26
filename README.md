@@ -1,24 +1,9 @@
-# README
+# SeriesReport
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Personal application for tracking series information for books.
 
-Things you may want to cover:
+Uses several data sources including ISBNdb.com (via API), OpenLibrary.org (via monthly imports), and allows for personal Goodreads imports.
 
-* Ruby version
+Handles a fair amount of data cleanup and standardization from its sources in addition to series title parsing heuristics.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+MASSIVE work in progress.
