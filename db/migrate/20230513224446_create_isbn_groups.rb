@@ -24,7 +24,7 @@ class CreateIsbnGroups < ActiveRecord::Migration[7.0]
     add_index :isbn_groups, [:ean, :group, :publisher_length, :name, :range_start, :range_end], unique: true, name: 'isbn_groups_unique_constraint'
 
     self.up_only do
-      Importers::Standards::Iso2108IsbnGroups.new.process
+      Import::Standards::Iso2108IsbnGroups.new.process(delete_file: false)
     end
   end
 end

@@ -5,9 +5,11 @@ class CreateIdentifiers < ActiveRecord::Migration[7.0]
       t.string :type, null: false
       t.string :identifier, null: false
 
+      t.datetime :source_last_modified
+
       t.timestamps
     end
 
-    add_index :identifiers, [:type, :identifier], unique: true, name: 'edition_identifiers_unique_constraint'
+    add_index :identifiers, [:type, :identifier], unique: true, name: 'identifiers_unique_constraint'
   end
 end

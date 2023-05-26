@@ -1,26 +1,26 @@
 class Edition < ApplicationRecord
-  include Sluggable
   include Authorable
+  include Identifiable
+  include Languageable
+  include Sluggable
 
-  SLUGGABLE_BY = [:work_id]
+  SLUGGABLE_BY = [:work_id].freeze
+  SLUGGABLE_FIELDS = [:title].freeze
+  MONTH_YEAR_REGEX = /^(january|february|march|april|may|june|july|august|september|october|november|december)\s\d+$/i
 
   belongs_to :work
-  has_many :edition_identifiers
   has_many :api_fetches, as: :fetchable, dependent: :destroy
-
-  scope :by_identifier, ->(id_class, ident) do
-    joins(:edition_identifiers).where(edition_identifiers: {
-      type: id_class.name,
-      identifier: ident
-    })
-  end
+  has_many :publishable_publishers, as: :publishable, dependent: :destroy
+  has_many :publishers, through: :publishable_publishers
+  has_many :subjectable_subjects, as: :subjectable, dependent: :destroy
+  has_many :subjects, through: :subjectable_subjects
 
   scope :without_goodreads_id, ->() do
-    joins("LEFT OUTER JOIN edition_identifiers ON editions.id = edition_identifiers.edition_id AND edition_identifiers.type = 'Identifier::GoodreadsId'").where(edition_identifiers: { id: nil })
+    joins("LEFT OUTER JOIN identifiers ON editions.id = identifiers.edition_id AND identifiers.type = 'Identifier::GoodreadsId'").where(identifiers: { id: nil })
   end
 
   scope :by_isbns, ->(isbns) {
-    joins(:edition_identifiers).where(edition_identifiers: {
+    joins(:identifiers).where(identifiers: {
       type: ['Identifier::Isbn10', 'Identifier::Isbn13'],
       identifier: isbns
     })
@@ -28,11 +28,5 @@ class Edition < ApplicationRecord
 
   def fetch
     self.api_fetches.first.api_data_for_edition_title
-  end
-
-  def add_identifier!(id_class, the_identifier)
-    return if id_class.invalid_identifier?(the_identifier)
-
-    id_class.create_or_find_by!(edition: self, identifier: the_identifier)
   end
 end

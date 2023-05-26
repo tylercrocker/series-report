@@ -3,8 +3,8 @@ class Import::Standards::Iso2108IsbnGroups < Import::Base
 
   # https://www.isbn-international.org/range_file_generation
   # Last generated: Thu, 11 May 2023 23:39:48 BST
-  def initialize file_path = File.join(Rails.root, 'lib', 'assets', 'isbn_group_ranges.xml'), sub_file = false
-    super(file_path, sub_file)
+  def initialize file_path: File.join(Rails.root, 'lib', 'assets', 'isbn_group_ranges.xml'), sub_file: true
+    super(file_path: file_path, sub_file: sub_file)
   end
 
   def import_object xml

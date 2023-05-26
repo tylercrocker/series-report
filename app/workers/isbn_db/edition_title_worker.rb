@@ -2,7 +2,7 @@
 # Normally books should be done in batches to reduce overall API qeries.
 class IsbnDb::EditionTitleWorker < IsbnDb::BaseWorker
   def perform edition_id
-    edition = Edition.where(id: edition_id).preload(:edition_identifiers).first
+    edition = Edition.where(id: edition_id).preload(:identifiers).first
     return if edition.nil?
 
     begin
@@ -18,7 +18,7 @@ class IsbnDb::EditionTitleWorker < IsbnDb::BaseWorker
     api_fetch.status = :processing
     api_fetch.save!
 
-    # identifiers = edition.edition_identifiers.index_by(&:type)
+    # identifiers = edition.identifiers.index_by(&:type)
     # isbn13, isbn10 = [
     #   identifiers['Identifier::Isbn13']&.identifier,
     #   identifiers['Identifier::Isbn10']&.identifier

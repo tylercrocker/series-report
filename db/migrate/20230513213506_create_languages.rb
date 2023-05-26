@@ -1,8 +1,8 @@
 class CreateLanguages < ActiveRecord::Migration[7.0]
   def change
     create_table :languages do |t|
-      t.string :iso_639_2, null: false
-      t.string :iso_639_2_type
+      t.string :iso_639_2, null: false, index: true
+      t.string :iso_639_2_type # NULL, bibliographic, or terminology
       t.string :iso_639_1, index: true
 
       t.string :name_lang, null: false
@@ -12,11 +12,20 @@ class CreateLanguages < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :languages, [:iso_639_2, :iso_639_2_type], name: 'languages_iso_lookup'
-    add_index :languages, [:name_lang, :name, :iso_639_2, :iso_639_2_type], unique: true, name: 'languages_unique_constraint'
+    add_index :languages, [:iso_639_2, :name_lang]
+    add_index :languages, [:name_lang, :name, :iso_639_2], unique: true, name: 'languages_unique_constraint'
 
     self.up_only do
-      Importers::Standards::Iso639Languages.new.process
+      Import::Standards::Iso639Languages.new.process(delete_file: false)
     end
+
+    create_table :languageable_languages do |t|
+      t.string :iso_639_2, null: false, index: false
+      t.references :languageable, polymorphic: true, null: false, index: false
+
+      t.timestamps
+    end
+
+    add_index :languageable_languages, [:languageable_type, :languageable_id, :iso_639_2], unique: true, name: 'languagable_languages_unique_constraint'
   end
 end

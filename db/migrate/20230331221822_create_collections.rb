@@ -25,7 +25,7 @@ class CreateCollections < ActiveRecord::Migration[7.0]
       # => Pirateaba's `The Wandering Inn` is technically published chapter by chapter on their website but the books themselves are published as books
       # Covers extremely large values just in case (custom lists?) up to 999.99
       # => this effectively gives someone 99,999 entries if they wanted to increment by 100ths
-      # => values past 1,000 (or 100,000 in the latter case) just seem rediculous and I can't think of a real would example
+      # => values past 1,000 (or 100,000 in the latter case) just seem rediculous and I can't think of a real world example
       # Technically One Piece has over 1,000 episodes; maybe once I get to TV shows I'll have to consider increasing this?
       # I'm going to use precision: 6, scale: 3 just for the sake of future proofing and will address it again when I get to adding more involved media types
       t.decimal :position, precision: 6, scale: 3

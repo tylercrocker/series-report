@@ -6,8 +6,12 @@ class Import::Goodreads < Import::Base
   attr_accessor :goodreads_id, :isbn10, :isbn13, :edition, :work, :title, :series
 
   # TODO : REMOVE
-  def initialize file_path='/Users/tyler/Downloads/series-report/goodreads_library_export.csv', sub_file = false
-    super(file_path, sub_file)
+  def initialize file_path: '/Users/tyler/Downloads/series-report/goodreads_library_export.csv', sub_file: true
+    super(file_path: file_path, sub_file: sub_file)
+  end
+
+  def process delete_file: false
+    super(delete_file: delete_file)
   end
 
   def import_object data
@@ -49,18 +53,18 @@ class Import::Goodreads < Import::Base
     # Generally trusting that both versions of the author's name will be there
     # It seems to be from my sample so far
     author_fl = data['Author'].strip.squeeze(' ')
-    author_lf = data['Author l-f'].strip.squeeze(' ')
+    # author_lf = data['Author l-f'].strip.squeeze(' ')
 
     # First let's just look for an exact match
-    author = Person.with_book_roles.where(name: author_fl, name_last_first: author_lf).first
+    author = Person.with_book_roles.where(name: author_fl).first
     return author unless author.nil?
 
     # If we didn't have an exact match let's try and do some more fuzzy-type matching
-    people = Person.with_book_roles.by_names([author_fl, author_lf]).to_a.uniq
+    people = Person.with_book_roles.by_names(author_fl).to_a.uniq
     case people.length
     when 0
       # This has a VERY minor race condition issue, we should be able to ignore it
-      Person.with_book_roles.where(name: author_fl, name_last_first: author_lf).first_or_create
+      Person.with_book_roles.where(name: author_fl).first_or_create
     when 1
       people.first
     else

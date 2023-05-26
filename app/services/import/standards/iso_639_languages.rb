@@ -3,8 +3,8 @@ class Import::Standards::Iso639Languages < Import::Base
 
   # https://www.loc.gov/standards/iso639-2/php/code_list.php
   # File was last updated 2017-12-21
-  def initialize file_path=File.join(Rails.root, 'lib', 'assets', 'iso_639_languages.csv'), sub_file = false
-    super(file_path, sub_file)
+  def initialize file_path: File.join(Rails.root, 'lib', 'assets', 'iso_639_languages.csv'), sub_file: true
+    super(file_path: file_path, sub_file: sub_file)
   end
 
   # HEADERS:

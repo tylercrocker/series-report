@@ -4,11 +4,13 @@ class CreateWorks < ActiveRecord::Migration[7.0]
       t.string :type, null: false
       t.string :slug, null: false
       t.string :title, null: false
+      t.string :subtitle
 
       t.integer :year_published
+      t.integer :month_published
       t.date :published_on
 
-      t.text :description
+      t.json :data
 
       t.timestamps
     end

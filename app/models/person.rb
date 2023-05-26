@@ -1,7 +1,53 @@
 class Person < ApplicationRecord
   include Sluggable
   include AlternateNameable
+  include Identifiable
+  include JsonDatable
 
+  DATA_SETTERS = {
+    'bio=': {
+      type: String
+    },
+    'birthday=': {
+      type: Date
+    },
+    'birth_year=': {
+      type: Integer
+    },
+    'birthday_estimate=': {
+      type: String
+    },
+    'deathday=': {
+      type: Date
+    },
+    'death_year=': {
+      type: Integer
+    },
+    'deathday_estimate=': {
+      type: String
+    },
+    'period_active=': {
+      type: String
+    },
+    'location=': {
+      type: String
+    },
+    'links=': {
+      type: Array,
+      contents: {
+        type: Hash,
+        structure: {
+          title: {
+            type: String
+          },
+          url: {
+            type: URI
+          }
+        }
+      }
+    }
+  }.freeze
+  DATA_ACCESSORS = DATA_SETTERS.keys.map{ |key| key.to_s.delete('=').to_sym }.freeze
   SLUGGABLE_FIELDS = [:name].freeze
 
   has_many :contributions
@@ -10,7 +56,6 @@ class Person < ApplicationRecord
 
   scope :by_names, ->(names) do
     scope = joins(:alternate_names).where(name: names)
-    scope = scope.or(joins(:alternate_names).where(name_last_first: names))
     scope.or(joins(:alternate_names).where(alternate_names: { name: names }))
   end
 
@@ -32,7 +77,7 @@ class Person < ApplicationRecord
     joins('LEFT OUTER JOIN edit_requests ON edit_requests.editable_type = \'Person\' AND edit_requests.editable_id = people.id AND edit_requests.status = 0') # 0 is waiting
   end
 
-  def self.sort_scope(scope, sort:, direction:, role: nil)
+  def self.sort_scope scope, sort:, direction:, role: nil
     case sort
     when 'num_works'
       return scope.order(Arel.sql("COUNT(*) #{direction}")) if role == 'authors'
@@ -59,11 +104,6 @@ class Person < ApplicationRecord
         type: 'string',
         value: self.name,
         required: true
-      },
-      name_last_first: {
-        editable: false,
-        type: 'string',
-        value: self.name_last_first
       },
       alternate_names: {
         editable: true,

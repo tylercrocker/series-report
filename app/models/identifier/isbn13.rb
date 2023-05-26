@@ -11,7 +11,7 @@ class Identifier::Isbn13 < Identifier
   class UnsupportedGroupError < StandardError; end
 
   def self.invalid_identifier? identifiable, the_identifier
-    return true if super(the_identifier)
+    return true if super(identifiable, the_identifier)
 
     # ISBNs are only valid for books editions!
     return true unless identifiable.is_a?(Edition::Book)

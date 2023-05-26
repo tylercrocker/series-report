@@ -4,9 +4,8 @@ class CreatePeople < ActiveRecord::Migration[7.0]
       t.string :slug, index: { unique: true, name: 'people_unique_constraint' }
 
       t.string :name, index: true, null: false
-      t.string :name_last_first, index: true, null: false
 
-      t.text :bio
+      t.json :data
 
       t.timestamps
     end
@@ -23,12 +22,11 @@ class CreatePeople < ActiveRecord::Migration[7.0]
 
     create_table :alternate_names do |t|
       t.references :nameable, index: false, null: false, polymorphic: true
-      t.string :name
-      t.string :language
+      t.string :name, null: false
 
       t.timestamps
     end
 
-    add_index :alternate_names, [:nameable_type, :nameable_id, :name, :language], unique: true, name: 'alternate_names_unique_constraint'
+    add_index :alternate_names, [:nameable_type, :nameable_id, :name], unique: true, name: 'alternate_names_unique_constraint'
   end
 end

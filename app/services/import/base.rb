@@ -1,15 +1,18 @@
 class Import::Base
-  def initialize the_file_path, sub_file = false
-    @file_path = the_file_path if the_file_path.start_with?('/')
-    @file_path ||= File.join(Rails.root, 'storage', the_file_path)
+  class FileReadError < StandardError;end
+
+  def initialize file_path:, sub_file: false
+    @file_path = file_path if file_path.start_with?('/')
+    @file_path ||= File.join(Rails.root, 'storage', file_path)
     @sub_file = sub_file
 
-    raise Errors::FileReadError, @file_path unless File.exist?(@file_path)
+    raise FileReadError, @file_path unless File.exist?(@file_path)
   end
 
-  def process
+  def process delete_file: false
     if @sub_file || [:process_json, :process_xml].include?(self.class::PROCESS_METHOD)
       self.send(self.class::PROCESS_METHOD)
+      File.delete(@file_path) if delete_file
       return
     end
 
@@ -22,7 +25,7 @@ class Import::Base
     current_file = nil
     last_idx = nil
     File.open(@file_path, 'r').each_line.with_index do |line, idx|
-      if (idx % 1000).zero?
+      if (idx % 100).zero?
         puts "Splitting on line #{format_number(idx)}"
         # Start the worker for the last file if we had one
         ImportWorker.perform_async(self.class.name, current_file.path) unless current_file.nil?
@@ -34,6 +37,7 @@ class Import::Base
       last_idx = idx
     end
     current_file.close
+    File.delete(@file_path) if delete_file
 
     # Start the last worker since the system will always append the last set of lines but not start it
     ImportWorker.perform_async(self.class.name, current_file.path)

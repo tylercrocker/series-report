@@ -1,7 +1,9 @@
 class Work < ApplicationRecord
-  include Sluggable
   include AlternateNameable
   include Authorable
+  include Identifiable
+  include JsonDatable
+  include Sluggable
 
   SLUGGABLE_FIELDS = [:title].freeze
 
@@ -9,6 +11,8 @@ class Work < ApplicationRecord
   has_many :collections, through: :collection_items
   has_many :editions
   has_many :edit_requests, as: :editable, dependent: :destroy
+  has_many :subjectable_subjects, as: :subjectable, dependent: :destroy
+  has_many :subjects, through: :subjectable_subjects
 
   scope :outer_joins_waiting_edit_requests, ->() do
     joins('LEFT OUTER JOIN edit_requests ON edit_requests.editable_type = \'Work\' AND edit_requests.editable_id = works.id AND edit_requests.status = 0') # 0 is waiting
@@ -54,7 +58,7 @@ class Work < ApplicationRecord
       description: {
         editable: true,
         type: 'text',
-        value: self.description,
+        value: self.ol_description,
         required: false
       },
       year_published: {

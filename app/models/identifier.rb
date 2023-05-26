@@ -3,7 +3,7 @@ class Identifier < ApplicationRecord
 
   class InvalidIdentifierError < StandardError; end
 
-  def self.invalid_identifier? identifiable, new_id
+  def self.invalid_identifier? _identifiable, new_id
     new_id.blank?
   end
 end

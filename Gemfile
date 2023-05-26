@@ -29,6 +29,9 @@ gem "redis", "~> 4.0"
 gem 'sidekiq'
 gem 'sidekiq-limit_fetch'
 
+# Fuzzy string matching
+gem 'amatch'
+
 gem 'haml'
 gem 'nokogiri'
 gem 'pagy'

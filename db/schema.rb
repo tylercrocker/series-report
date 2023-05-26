@@ -10,18 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_23_054711) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "alternate_names", force: :cascade do |t|
     t.string "nameable_type", null: false
     t.bigint "nameable_id", null: false
-    t.string "name"
-    t.string "language"
+    t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["nameable_type", "nameable_id", "name", "language"], name: "alternate_names_unique_constraint", unique: true
+    t.index ["nameable_type", "nameable_id", "name"], name: "alternate_names_unique_constraint", unique: true
   end
 
   create_table "api_fetches", force: :cascade do |t|
@@ -86,7 +85,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
     t.string "type", null: false
     t.string "slug", null: false
     t.string "title", null: false
-    t.text "notes"
+    t.string "subtitle"
+    t.integer "year_published"
+    t.integer "month_published"
+    t.date "published_on"
     t.json "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -98,10 +100,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
     t.bigint "identifiable_id", null: false
     t.string "type", null: false
     t.string "identifier", null: false
+    t.datetime "source_last_modified"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["identifiable_type", "identifiable_id"], name: "index_identifiers_on_identifiable"
-    t.index ["type", "identifier"], name: "edition_identifiers_unique_constraint", unique: true
+    t.index ["type", "identifier"], name: "identifiers_unique_constraint", unique: true
   end
 
   create_table "isbn_groups", force: :cascade do |t|
@@ -120,6 +123,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
     t.index ["ean", "group", "publisher_length", "name", "range_start", "range_end"], name: "isbn_groups_unique_constraint", unique: true
   end
 
+  create_table "languageable_languages", force: :cascade do |t|
+    t.string "iso_639_2", null: false
+    t.string "languageable_type", null: false
+    t.bigint "languageable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["languageable_type", "languageable_id", "iso_639_2"], name: "languagable_languages_unique_constraint", unique: true
+  end
+
   create_table "languages", force: :cascade do |t|
     t.string "iso_639_2", null: false
     t.string "iso_639_2_type"
@@ -130,21 +142,30 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["iso_639_1"], name: "index_languages_on_iso_639_1"
-    t.index ["iso_639_2", "iso_639_2_type"], name: "languages_iso_lookup"
+    t.index ["iso_639_2", "name_lang"], name: "index_languages_on_iso_639_2_and_name_lang"
+    t.index ["iso_639_2"], name: "index_languages_on_iso_639_2"
     t.index ["name"], name: "index_languages_on_name"
-    t.index ["name_lang", "name", "iso_639_2", "iso_639_2_type"], name: "languages_unique_constraint", unique: true
+    t.index ["name_lang", "name", "iso_639_2"], name: "languages_unique_constraint", unique: true
   end
 
   create_table "people", force: :cascade do |t|
     t.string "slug"
     t.string "name", null: false
-    t.string "name_last_first", null: false
-    t.text "bio"
+    t.json "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_people_on_name"
-    t.index ["name_last_first"], name: "index_people_on_name_last_first"
     t.index ["slug"], name: "people_unique_constraint", unique: true
+  end
+
+  create_table "publishable_publishers", force: :cascade do |t|
+    t.bigint "publisher_id", null: false
+    t.string "publishable_type", null: false
+    t.bigint "publishable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["publishable_type", "publishable_id", "publisher_id"], name: "publishable_publishers_unique_constraint", unique: true
+    t.index ["publisher_id"], name: "index_publishable_publishers_on_publisher_id"
   end
 
   create_table "publisher_isbn_registrations", force: :cascade do |t|
@@ -163,6 +184,24 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "publishers_unique_constraint", unique: true
+  end
+
+  create_table "subjectable_subjects", force: :cascade do |t|
+    t.bigint "subject_id", null: false
+    t.string "subjectable_type", null: false
+    t.bigint "subjectable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["subject_id"], name: "index_subjectable_subjects_on_subject_id"
+    t.index ["subjectable_type", "subjectable_id", "subject_id"], name: "subjectable_subjects_unique_constraint", unique: true
+  end
+
+  create_table "subjects", force: :cascade do |t|
+    t.string "type", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["type", "name"], name: "subjects_unique_constraint", unique: true
   end
 
   create_table "taggings", force: :cascade do |t|
@@ -200,9 +239,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
     t.string "type", null: false
     t.string "slug", null: false
     t.string "title", null: false
+    t.string "subtitle"
     t.integer "year_published"
+    t.integer "month_published"
     t.date "published_on"
-    t.text "description"
+    t.json "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["type", "slug"], name: "works_unique_constraint", unique: true
@@ -212,5 +253,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_16_004924) do
   add_foreign_key "contributions", "people", on_delete: :restrict
   add_foreign_key "editions", "works", on_delete: :restrict
   add_foreign_key "publisher_isbn_registrations", "publishers", on_delete: :restrict
+  add_foreign_key "subjectable_subjects", "subjects", on_delete: :restrict
   add_foreign_key "taggings", "tags"
 end

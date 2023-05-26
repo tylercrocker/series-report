@@ -71,6 +71,9 @@ GEM
       activerecord (>= 6.0, < 7.1)
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
+    amatch (0.4.1)
+      mize
+      tins (~> 1.0)
     bindex (0.8.1)
     bootsnap (1.16.0)
       msgpack (~> 1.2)
@@ -129,6 +132,8 @@ GEM
     method_source (1.0.0)
     mini_mime (1.1.2)
     minitest (5.18.0)
+    mize (0.4.1)
+      protocol (~> 2.0)
     msgpack (1.6.1)
     multi_json (1.15.0)
     multi_xml (0.6.0)
@@ -148,6 +153,8 @@ GEM
     pagy (6.0.3)
     pg (1.4.6)
     plissken (2.0.1)
+    protocol (2.0.0)
+      ruby_parser (~> 3.0)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -189,6 +196,9 @@ GEM
     redis-client (0.14.0)
       connection_pool
     ruby2_keywords (0.0.5)
+    ruby_parser (3.20.1)
+      sexp_processor (~> 4.16)
+    sexp_processor (4.17.0)
     sidekiq (7.0.7)
       concurrent-ruby (< 2)
       connection_pool (>= 2.3.0)
@@ -208,10 +218,13 @@ GEM
       actionpack (>= 5.2)
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
+    sync (0.5.0)
     temple (0.10.0)
     thor (1.2.1)
     tilt (2.1.0)
     timeout (0.3.2)
+    tins (1.32.1)
+      sync
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     web-console (4.2.0)
@@ -230,6 +243,7 @@ PLATFORMS
 DEPENDENCIES
   active_record_query_trace
   acts-as-taggable-on
+  amatch
   bootsnap
   cssbundling-rails
   debug
